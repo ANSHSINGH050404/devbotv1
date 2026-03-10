@@ -1,0 +1,15 @@
+{
+  "name": "cli",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "dependencies": {
+    "runtime": "workspace:*"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
