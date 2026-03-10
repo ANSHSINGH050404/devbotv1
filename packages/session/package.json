@@ -1,0 +1,15 @@
+{
+  "name": "session",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.31.9"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "drizzle-orm": "^0.45.1"
+  }
+}
