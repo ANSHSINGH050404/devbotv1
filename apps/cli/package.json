@@ -4,10 +4,12 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/yargs": "^17.0.35"
   },
   "dependencies": {
-    "runtime": "workspace:*"
+    "runtime": "workspace:*",
+    "yargs": "^18.0.0"
   },
   "peerDependencies": {
     "typescript": "^5"
