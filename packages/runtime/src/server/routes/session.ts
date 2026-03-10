@@ -1,14 +1,28 @@
 import { Hono } from "hono";
+import {
+  createSession,
+  listSessions,
+  getSession,
+} from "../../../../session/src/service/session-service";
 
 export const sessionRoute = new Hono();
 
 sessionRoute.post("/", async (c) => {
-  const body = await c.req.json();
+  const session = await createSession("default-project");
 
-  const prompt = body.prompt;
+  return c.json(session);
+});
 
-  return c.json({
-    received: prompt,
-    message: "Agent execution not implemented yet"
-  });
+sessionRoute.get("/", async (c) => {
+  const sessions = await listSessions();
+
+  return c.json(sessions);
+});
+
+sessionRoute.get("/:id", async (c) => {
+  const id = c.req.param("id");
+
+  const session = await getSession(id);
+
+  return c.json(session);
 });

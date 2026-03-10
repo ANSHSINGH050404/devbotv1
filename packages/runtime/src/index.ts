@@ -8,11 +8,15 @@ export async function startRuntime() {
 
   const port = 3000;
 
-  console.log(`Runtime starting on http://localhost:${port}`);
-  console.log(`Project: ${project.name}`);
+ 
+  
+  console.log("Project detected:");
+  console.log(project);
 
   serve({
     port,
     fetch: app.fetch
   });
+
+   console.log(`Runtime starting on http://localhost:${port}`);
 }
