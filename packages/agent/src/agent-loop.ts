@@ -27,6 +27,11 @@ export interface RunAgentLoopOptions {
   maxIterations?: number;
 }
 
+export type AgentStreamEvent =
+  | { type: "token"; text: string }
+  | { type: "tool"; name: string; args: unknown; result: unknown }
+  | { type: "final"; message: AgentMessage };
+
 export async function runAgentLoop({
   llm,
   tools,
@@ -87,7 +92,7 @@ export async function* runAgentLoopStream({
   tools,
   context,
   maxIterations = 8,
-}: RunAgentLoopOptions): AsyncIterable<string> {
+}: RunAgentLoopOptions): AsyncIterable<AgentStreamEvent> {
   let iterations = 0;
 
   while (iterations < maxIterations) {
@@ -115,6 +120,7 @@ export async function* runAgentLoopStream({
         }
 
         const result = await tool.execute(args);
+        yield { type: "tool", name: toolName, args, result };
         context.push({
           role: "tool",
           name: toolName,
@@ -129,15 +135,17 @@ export async function* runAgentLoopStream({
     if (llm.stream) {
       for await (const chunk of llm.stream(context)) {
         if (chunk.delta) {
-          yield chunk.delta;
+          yield { type: "token", text: chunk.delta };
         }
       }
+      yield { type: "final", message };
       return;
     }
 
     if (message.content) {
-      yield message.content;
+      yield { type: "token", text: message.content };
     }
+    yield { type: "final", message };
     return;
   }
 

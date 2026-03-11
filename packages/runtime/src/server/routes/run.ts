@@ -6,6 +6,7 @@ import {
   type LlmClient,
   type ToolRegistry,
   type ContextMessage,
+  type AgentStreamEvent,
 } from "agent";
 
 type RunEnv = {
@@ -74,18 +75,24 @@ runRoute.post("/stream", async (c) => {
     async start(controller) {
       const encoder = new TextEncoder();
 
-      const send = (data: string) => {
-        controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+      const send = (event: AgentStreamEvent | string) => {
+        const payload =
+          typeof event === "string" ? event : JSON.stringify(event);
+        controller.enqueue(encoder.encode(`data: ${payload}\n\n`));
       };
 
       try {
-        for await (const token of runAgentLoopStream({
+        for await (const evt of runAgentLoopStream({
           llm,
           tools,
           context: buildContext(messages),
           maxIterations: body.maxIterations,
         })) {
-          send(token.replace(/\r?\n/g, "\\n"));
+          if (evt.type === "token") {
+            send({ type: "token", text: evt.text.replace(/\r?\n/g, "\\n") });
+          } else {
+            send(evt);
+          }
         }
         send("[DONE]");
       } catch (err) {
