@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import path from "path";
+import { resolveWithinRoot } from "../utils/fs-path";
 
 export const readFileTool = {
   name: "read_file",
@@ -19,12 +19,7 @@ export const readFileTool = {
       throw new Error("path is required");
     }
 
-    const resolvedRoot = path.resolve(root);
-    const resolvedPath = path.resolve(resolvedRoot, filePath);
-    const rel = path.relative(resolvedRoot, resolvedPath);
-    if (rel.startsWith("..") || path.isAbsolute(rel)) {
-      throw new Error("path is outside allowed root");
-    }
+    const { resolvedPath } = resolveWithinRoot(root, filePath);
 
     const stat = await fs.stat(resolvedPath);
     if (stat.size > maxBytes) {

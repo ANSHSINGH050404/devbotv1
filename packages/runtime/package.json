@@ -20,6 +20,7 @@
     "zod": "^4.3.6",
     "session": "workspace:*",
     "agent": "workspace:*",
-    "tools": "workspace:*"
+    "tools": "workspace:*",
+    "llm": "workspace:*"
   }
 }

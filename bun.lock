@@ -65,6 +65,7 @@
       "dependencies": {
         "agent": "workspace:*",
         "hono": "^4.12.6",
+        "llm": "workspace:*",
         "session": "workspace:*",
         "tools": "workspace:*",
         "zod": "^4.3.6",

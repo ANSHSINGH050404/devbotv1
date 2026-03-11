@@ -7,11 +7,19 @@ import { sessionRoute } from "./routes/session";
 import { eventsRoute } from "./routes/events";
 import { messageRoute } from "./routes/message";
 import { runRoute } from "./routes/run";
-import { ToolRegistry, readFileTool } from "tools";
+import {
+  ToolRegistry,
+  readFileTool,
+  writeFileTool,
+  searchReplaceTool,
+  applyPatchTool,
+} from "tools";
+import { createProvider, type LLMClient } from "llm";
 
 type ServerEnv = {
   Variables: {
     tools: ToolRegistryType;
+    llm?: LLMClient;
   };
 };
 
@@ -20,9 +28,19 @@ export function createServer() {
   const tools = new ToolRegistry();
 
   tools.register(readFileTool);
+  tools.register(writeFileTool);
+  tools.register(searchReplaceTool);
+  tools.register(applyPatchTool);
+
+  const provider = process.env.LLM_PROVIDER;
+  const apiKey = process.env.LLM_API_KEY;
+  const llm = provider && apiKey ? createProvider(provider, apiKey) : undefined;
 
   app.use("*", async (c, next) => {
     c.set("tools", tools);
+    if (llm) {
+      c.set("llm", llm);
+    }
     await next();
   });
 
