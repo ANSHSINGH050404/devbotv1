@@ -4,3 +4,6 @@ export * from "./src/tools/read-file";
 export * from "./src/tools/write-file";
 export * from "./src/tools/search-replace";
 export * from "./src/tools/apply-patch";
+export * from "./src/tools/search-files";
+export * from "./src/tools/grep-code";
+export * from "./src/tools/find-symbols";

@@ -9,6 +9,9 @@
     "@types/bun": "latest",
     "@types/node": "^25.4.0"
   },
+  "dependencies": {
+    "typescript": "^5.9.2"
+  },
   "peerDependencies": {
     "typescript": "^5"
   }
