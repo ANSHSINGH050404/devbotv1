@@ -1,7 +1,9 @@
+import type { ArgumentsCamelCase } from "yargs";
+
 export const runCommand = {
   command: "run <prompt>",
   describe: "Send a prompt to the agent",
-  handler: async (argv: { prompt: string }) => {
+  handler: async (argv: ArgumentsCamelCase<{ prompt: string }>) => {
     const prompt = argv.prompt;
 
     console.log("Prompt:", prompt);

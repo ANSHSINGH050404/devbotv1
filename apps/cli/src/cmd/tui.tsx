@@ -27,7 +27,10 @@ function useChatRuntime(baseUrl: string) {
   const [isStreaming, setIsStreaming] = useState(false);
 
   const sendPrompt = async (prompt: string) => {
-    const nextMessages = [...messages, { role: "user", content: prompt }];
+    const nextMessages: ChatMessage[] = [
+      ...messages,
+      { role: "user", content: prompt },
+    ];
     setMessages(nextMessages);
     setStreamingText("");
     setIsStreaming(true);
@@ -40,7 +43,7 @@ function useChatRuntime(baseUrl: string) {
 
     if (!res.body) {
       setIsStreaming(false);
-      setMessages((prev) => [
+      setMessages((prev: ChatMessage[]) => [
         ...prev,
         { role: "assistant", content: "No response body from server." },
       ]);
@@ -65,10 +68,10 @@ function useChatRuntime(baseUrl: string) {
         if (data === "[DONE]") {
           setIsStreaming(false);
           if (streamingText.trim()) {
-            setMessages((prev) => [
-              ...prev,
-              { role: "assistant", content: streamingText },
-            ]);
+          setMessages((prev: ChatMessage[]) => [
+            ...prev,
+            { role: "assistant", content: streamingText },
+          ]);
           }
           setStreamingText("");
           continue;
@@ -77,15 +80,15 @@ function useChatRuntime(baseUrl: string) {
         try {
           const evt = JSON.parse(data) as StreamEvent;
           if (evt.type === "token") {
-            setStreamingText((prev) => prev + evt.text.replace(/\\n/g, "\n"));
+            setStreamingText((prev: string) => prev + evt.text.replace(/\\n/g, "\n"));
           } else if (evt.type === "tool") {
-            setTools((prev) => [
+            setTools((prev: ToolEvent[]) => [
               ...prev,
               { name: evt.name, args: evt.args, result: evt.result },
             ]);
           } else if (evt.type === "final") {
             if (evt.message?.content) {
-              setMessages((prev) => [
+              setMessages((prev: ChatMessage[]) => [
                 ...prev,
                 { role: "assistant", content: evt.message.content || "" },
               ]);
@@ -115,7 +118,7 @@ function ChatApp({ baseUrl }: { baseUrl: string }) {
       <Text>Dev Agent TUI</Text>
       <Text>Runtime: {baseUrl}</Text>
       <Box flexDirection="column" marginTop={1}>
-        {history.map((msg, idx) => (
+        {history.map((msg: ChatMessage, idx: number) => (
           <Text key={idx}>
             [{msg.role}] {msg.content}
           </Text>
@@ -129,7 +132,7 @@ function ChatApp({ baseUrl }: { baseUrl: string }) {
       {tools.length > 0 && (
         <Box flexDirection="column" marginTop={1}>
           <Text>Tools:</Text>
-          {tools.slice(-5).map((tool, idx) => (
+          {tools.slice(-5).map((tool: ToolEvent, idx: number) => (
             <Text key={idx}>
               - {tool.name}
             </Text>

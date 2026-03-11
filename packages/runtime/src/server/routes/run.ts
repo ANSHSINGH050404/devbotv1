@@ -81,6 +81,10 @@ runRoute.post("/stream", async (c) => {
         controller.enqueue(encoder.encode(`data: ${payload}\n\n`));
       };
 
+      const heartbeat = setInterval(() => {
+        controller.enqueue(encoder.encode(`event: ping\ndata: {}\n\n`));
+      }, 15000);
+
       try {
         for await (const evt of runAgentLoopStream({
           llm,
@@ -99,6 +103,7 @@ runRoute.post("/stream", async (c) => {
         const message = err instanceof Error ? err.message : "Agent run failed";
         send(`ERROR: ${message}`);
       } finally {
+        clearInterval(heartbeat);
         controller.close();
       }
     },

@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/react": "^18.3.12",
     "@types/yargs": "^17.0.35"
   },
   "dependencies": {
