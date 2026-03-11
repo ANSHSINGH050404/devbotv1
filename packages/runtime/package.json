@@ -18,6 +18,7 @@
   "dependencies": {
     "hono": "^4.12.6",
     "zod": "^4.3.6",
-    "session": "workspace:*"
+    "session": "workspace:*",
+    "agent": "workspace:*"
   }
 }

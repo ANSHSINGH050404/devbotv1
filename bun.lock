@@ -41,6 +41,7 @@
     "packages/runtime": {
       "name": "runtime",
       "dependencies": {
+        "agent": "workspace:*",
         "hono": "^4.12.6",
         "session": "workspace:*",
         "zod": "^4.3.6",

@@ -5,6 +5,7 @@ import { configRoute } from "./routes/config";
 import { sessionRoute } from "./routes/session";
 import { eventsRoute } from "./routes/events";
 import { messageRoute } from "./routes/message";
+import { runRoute } from "./routes/run";
 
 export function createServer() {
   const app = new Hono();
@@ -13,6 +14,7 @@ export function createServer() {
   app.route("/config", configRoute);
   app.route("/session", sessionRoute);
   app.route("/message", messageRoute);
+  app.route("/run", runRoute);
   app.route("/events", eventsRoute);
 
   return app;
