@@ -6,9 +6,18 @@ import { sessionRoute } from "./routes/session";
 import { eventsRoute } from "./routes/events";
 import { messageRoute } from "./routes/message";
 import { runRoute } from "./routes/run";
+import { ToolRegistry, readFileTool } from "tools";
 
 export function createServer() {
   const app = new Hono();
+  const tools = new ToolRegistry();
+
+  tools.register(readFileTool);
+
+  app.use("*", async (c, next) => {
+    c.set("tools", tools);
+    await next();
+  });
 
   app.route("/health", healthRoute);
   app.route("/config", configRoute);

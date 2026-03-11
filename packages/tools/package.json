@@ -1,0 +1,15 @@
+{
+  "name": "tools",
+  "module": "index.ts",
+  "main": "index.ts",
+  "types": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^25.4.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
