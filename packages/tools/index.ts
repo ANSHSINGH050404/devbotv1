@@ -7,3 +7,7 @@ export * from "./src/tools/apply-patch";
 export * from "./src/tools/search-files";
 export * from "./src/tools/grep-code";
 export * from "./src/tools/find-symbols";
+export * from "./src/tools/git-status";
+export * from "./src/tools/git-diff";
+export * from "./src/tools/git-commit";
+export * from "./src/tools/git-branch";

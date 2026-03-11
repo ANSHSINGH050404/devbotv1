@@ -16,6 +16,10 @@ import {
   searchFilesTool,
   grepCodeTool,
   findSymbolsTool,
+  gitStatusTool,
+  gitDiffTool,
+  gitCommitTool,
+  gitBranchTool,
 } from "tools";
 import { createProvider, type LLMClient } from "llm";
 
@@ -37,6 +41,10 @@ export function createServer() {
   tools.register(searchFilesTool);
   tools.register(grepCodeTool);
   tools.register(findSymbolsTool);
+  tools.register(gitStatusTool);
+  tools.register(gitDiffTool);
+  tools.register(gitCommitTool);
+  tools.register(gitBranchTool);
 
   const provider = process.env.LLM_PROVIDER;
   const apiKey = process.env.LLM_API_KEY;
