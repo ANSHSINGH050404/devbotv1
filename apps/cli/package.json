@@ -3,6 +3,9 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "lint": "eslint \"src/**/*.ts\""
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/yargs": "^17.0.35"

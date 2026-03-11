@@ -3,13 +3,14 @@ import { sessions } from "../schema/session";
 import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 
-export async function createSession(projectId: string) {
+export async function createSession(projectId: string, title?: string) {
   const id = randomUUID();
+  const normalizedTitle = title && title.trim() ? title.trim() : "New Session";
 
   await db.insert(sessions).values({
     id,
     projectId,
-    title: "New Session",
+    title: normalizedTitle,
     status: "active",
     createdAt: new Date().toISOString(),
   });

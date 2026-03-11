@@ -1,7 +1,7 @@
 export const runCommand = {
   command: "run <prompt>",
   describe: "Send a prompt to the agent",
-  handler: async (argv: any) => {
+  handler: async (argv: { prompt: string }) => {
     const prompt = argv.prompt;
 
     console.log("Prompt:", prompt);

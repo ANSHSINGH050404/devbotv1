@@ -1,6 +1,12 @@
 {
   "name": "session",
   "private": true,
+  "module": "src/index.ts",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "lint": "eslint \"src/**/*.ts\""
+  },
   "devDependencies": {
     "@types/node": "^22.13.5",
     "@types/bun": "latest",
@@ -10,7 +16,6 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "better-sqlite3": "^12.6.2",
     "drizzle-orm": "^0.45.1"
   }
 }

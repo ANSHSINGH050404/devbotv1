@@ -5,6 +5,9 @@
   "types": "src/index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "lint": "eslint \"src/**/*.ts\""
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^25.4.0"
@@ -14,6 +17,7 @@
   },
   "dependencies": {
     "hono": "^4.12.6",
-    "zod": "^4.3.6"
+    "zod": "^4.3.6",
+    "session": "workspace:*"
   }
 }
