@@ -2,6 +2,7 @@ import type { ContextMessage, ToolCall } from "./context-builder";
 
 export interface LlmClient {
   chat(context: ContextMessage[]): Promise<{ message: AgentMessage }>;
+  stream?(context: ContextMessage[]): AsyncIterable<{ delta: string }>;
 }
 
 export interface Tool {
@@ -76,6 +77,68 @@ export async function runAgentLoop({
 
     // Final assistant response
     return message;
+  }
+
+  throw new Error("Agent loop exceeded iteration limit");
+}
+
+export async function* runAgentLoopStream({
+  llm,
+  tools,
+  context,
+  maxIterations = 8,
+}: RunAgentLoopOptions): AsyncIterable<string> {
+  let iterations = 0;
+
+  while (iterations < maxIterations) {
+    iterations++;
+
+    const response = await llm.chat(context);
+    const message = response.message;
+    const toolCalls = message.toolCalls ?? (message.toolCall ? [message.toolCall] : []);
+
+    if (toolCalls.length > 0) {
+      context.push({
+        role: "assistant",
+        content: message.content ?? "",
+        toolCall: message.toolCall,
+        toolCalls: message.toolCalls,
+      });
+
+      for (const call of toolCalls) {
+        const toolName = call.name;
+        const args = call.args;
+
+        const tool = tools[toolName];
+        if (!tool) {
+          throw new Error(`Unknown tool: ${toolName}`);
+        }
+
+        const result = await tool.execute(args);
+        context.push({
+          role: "tool",
+          name: toolName,
+          toolCallId: call.id,
+          content: JSON.stringify(result),
+        });
+      }
+
+      continue;
+    }
+
+    if (llm.stream) {
+      for await (const chunk of llm.stream(context)) {
+        if (chunk.delta) {
+          yield chunk.delta;
+        }
+      }
+      return;
+    }
+
+    if (message.content) {
+      yield message.content;
+    }
+    return;
   }
 
   throw new Error("Agent loop exceeded iteration limit");

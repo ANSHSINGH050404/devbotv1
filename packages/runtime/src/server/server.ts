@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import type { ToolRegistry as ToolRegistryType } from "tools";
 
 import { healthRoute } from "./routes/health";
 import { configRoute } from "./routes/config";
@@ -8,8 +9,14 @@ import { messageRoute } from "./routes/message";
 import { runRoute } from "./routes/run";
 import { ToolRegistry, readFileTool } from "tools";
 
+type ServerEnv = {
+  Variables: {
+    tools: ToolRegistryType;
+  };
+};
+
 export function createServer() {
-  const app = new Hono();
+  const app = new Hono<ServerEnv>();
   const tools = new ToolRegistry();
 
   tools.register(readFileTool);
