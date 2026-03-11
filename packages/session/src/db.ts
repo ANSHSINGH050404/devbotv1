@@ -34,6 +34,16 @@ sqlite.exec(`
     pattern TEXT,
     mode TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS memories (
+    id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    key TEXT,
+    value TEXT NOT NULL,
+    importance INTEGER DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
 `);
 
 export const db = drizzle(sqlite);

@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { listMemories } from "session";
 import {
   buildContext,
   runAgentLoop,
@@ -38,10 +39,32 @@ runRoute.post("/", async (c) => {
   }
 
   try {
+    const projectId = c.req.query("projectId");
+    let contextMessages = buildContext(messages);
+    if (projectId) {
+      const memories = await listMemories(projectId, 50);
+      if (memories.length > 0) {
+        const memoryText = memories
+          .map((m) => `- [${m.type}] ${m.value}`)
+          .join("\n");
+        contextMessages = [
+          {
+            role: "system",
+            content: `Project memory:\n${memoryText}`,
+            name: undefined,
+            toolCallId: undefined,
+            toolCall: undefined,
+            toolCalls: undefined,
+          },
+          ...contextMessages,
+        ];
+      }
+    }
+
     const result = await runAgentLoop({
       llm,
       tools,
-      context: buildContext(messages),
+      context: contextMessages,
       maxIterations: body.maxIterations,
     });
 
@@ -86,10 +109,32 @@ runRoute.post("/stream", async (c) => {
       }, 15000);
 
       try {
+        const projectId = c.req.query("projectId");
+        let contextMessages = buildContext(messages);
+        if (projectId) {
+          const memories = await listMemories(projectId, 50);
+          if (memories.length > 0) {
+            const memoryText = memories
+              .map((m) => `- [${m.type}] ${m.value}`)
+              .join("\n");
+            contextMessages = [
+              {
+                role: "system",
+                content: `Project memory:\n${memoryText}`,
+                name: undefined,
+                toolCallId: undefined,
+                toolCall: undefined,
+                toolCalls: undefined,
+              },
+              ...contextMessages,
+            ];
+          }
+        }
+
         for await (const evt of runAgentLoopStream({
           llm,
           tools,
-          context: buildContext(messages),
+          context: contextMessages,
           maxIterations: body.maxIterations,
         })) {
           if (evt.type === "token") {

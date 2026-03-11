@@ -7,6 +7,7 @@ import { sessionRoute } from "./routes/session";
 import { eventsRoute } from "./routes/events";
 import { messageRoute } from "./routes/message";
 import { runRoute } from "./routes/run";
+import { memoryRoute } from "./routes/memory";
 import {
   ToolRegistry,
   readFileTool,
@@ -63,6 +64,7 @@ export function createServer() {
   app.route("/session", sessionRoute);
   app.route("/message", messageRoute);
   app.route("/run", runRoute);
+  app.route("/memory", memoryRoute);
   app.route("/events", eventsRoute);
 
   return app;
