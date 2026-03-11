@@ -13,7 +13,7 @@ export class GeminiProvider implements LLMClient {
     const genAI = new GoogleGenerativeAI(apiKey);
 
     this.model = genAI.getGenerativeModel({
-      model: "gemini-pro",
+      model: "gemini-2.5-flash",
     });
   }
 

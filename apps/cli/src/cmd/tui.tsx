@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { render, Box, Text } from "ink";
+import Spinner from "ink-spinner";
 import TextInput from "ink-text-input";
 
 type ChatRole = "user" | "assistant" | "system" | "tool";
@@ -35,11 +36,36 @@ function useChatRuntime(baseUrl: string) {
     setStreamingText("");
     setIsStreaming(true);
 
-    const res = await fetch(`${baseUrl}/run/stream`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: nextMessages }),
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${baseUrl}/run/stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: nextMessages }),
+      });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to connect to server";
+      setIsStreaming(false);
+      setMessages((prev: ChatMessage[]) => [
+        ...prev,
+        { role: "assistant", content: `Connection error: ${message}` },
+      ]);
+      return;
+    }
+
+    if (!res.ok) {
+      const text = await res.text();
+      setIsStreaming(false);
+      setMessages((prev: ChatMessage[]) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `Server error (${res.status}): ${text}`,
+        },
+      ]);
+      return;
+    }
 
     if (!res.body) {
       setIsStreaming(false);
@@ -54,52 +80,72 @@ function useChatRuntime(baseUrl: string) {
     const decoder = new TextDecoder();
     let buffer = "";
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const parts = buffer.split("\n\n");
-      buffer = parts.pop() || "";
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split("\n\n");
+        buffer = parts.pop() || "";
 
-      for (const part of parts) {
-        const line = part.trim();
-        if (!line.startsWith("data:")) continue;
-        const data = line.slice(5).trim();
-        if (data === "[DONE]") {
-          setIsStreaming(false);
-          if (streamingText.trim()) {
-          setMessages((prev: ChatMessage[]) => [
-            ...prev,
-            { role: "assistant", content: streamingText },
-          ]);
-          }
-          setStreamingText("");
-          continue;
-        }
-
-        try {
-          const evt = JSON.parse(data) as StreamEvent;
-          if (evt.type === "token") {
-            setStreamingText((prev: string) => prev + evt.text.replace(/\\n/g, "\n"));
-          } else if (evt.type === "tool") {
-            setTools((prev: ToolEvent[]) => [
-              ...prev,
-              { name: evt.name, args: evt.args, result: evt.result },
-            ]);
-          } else if (evt.type === "final") {
-            if (evt.message?.content) {
+        for (const part of parts) {
+          const line = part.trim();
+          if (!line.startsWith("data:")) continue;
+          const data = line.slice(5).trim();
+          if (data === "[DONE]") {
+            setIsStreaming(false);
+            if (streamingText.trim()) {
               setMessages((prev: ChatMessage[]) => [
                 ...prev,
-                { role: "assistant", content: evt.message.content || "" },
+                { role: "assistant", content: streamingText },
               ]);
             }
             setStreamingText("");
-            setIsStreaming(false);
+            continue;
           }
-        } catch {
-          // ignore malformed events
+
+          if (data.startsWith("ERROR:")) {
+            setIsStreaming(false);
+            setMessages((prev: ChatMessage[]) => [
+              ...prev,
+              { role: "assistant", content: data },
+            ]);
+            setStreamingText("");
+            continue;
+          }
+
+          try {
+            const evt = JSON.parse(data) as StreamEvent;
+            if (evt.type === "token") {
+              setStreamingText((prev: string) => prev + evt.text.replace(/\\n/g, "\n"));
+            } else if (evt.type === "tool") {
+              setTools((prev: ToolEvent[]) => [
+                ...prev,
+                { name: evt.name, args: evt.args, result: evt.result },
+              ]);
+            } else if (evt.type === "final") {
+              if (evt.message?.content) {
+                setMessages((prev: ChatMessage[]) => [
+                  ...prev,
+                  { role: "assistant", content: evt.message.content || "" },
+                ]);
+              }
+              setStreamingText("");
+              setIsStreaming(false);
+            }
+          } catch {
+            // ignore malformed events
+          }
         }
       }
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Stream closed unexpectedly";
+      setIsStreaming(false);
+      setMessages((prev: ChatMessage[]) => [
+        ...prev,
+        { role: "assistant", content: `Stream error: ${message}` },
+      ]);
     }
   };
 
@@ -125,7 +171,7 @@ function ChatApp({ baseUrl }: { baseUrl: string }) {
         ))}
         {isStreaming && (
           <Text>
-            [assistant] {streamingText}
+            [assistant] {streamingText} <Spinner type="dots" />
           </Text>
         )}
       </Box>
