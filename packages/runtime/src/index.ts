@@ -15,7 +15,8 @@ export async function startRuntime() {
 
   serve({
     port,
-    fetch: app.fetch
+    fetch: app.fetch,
+    idleTimeout: 0
   });
 
    console.log(`Runtime starting on http://localhost:${port}`);

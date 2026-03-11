@@ -32,6 +32,21 @@ export type AgentStreamEvent =
   | { type: "tool"; name: string; args: unknown; result: unknown }
   | { type: "final"; message: AgentMessage };
 
+const TOOL_TAG_RE = /<\s*\/?\s*(execute_tool|tool_code|tool_output)\s*>/i;
+
+function sanitizeAssistantMessage(message: AgentMessage): AgentMessage {
+  if (!message.content) return message;
+  if (TOOL_TAG_RE.test(message.content)) {
+    return {
+      role: "assistant",
+      content:
+        "I need to use real tools to inspect the repository. " +
+        "Please allow me to run tool calls, and I will proceed using the tools.",
+    };
+  }
+  return message;
+}
+
 export async function runAgentLoop({
   llm,
   tools,
@@ -81,7 +96,7 @@ export async function runAgentLoop({
     }
 
     // Final assistant response
-    return message;
+    return sanitizeAssistantMessage(message);
   }
 
   throw new Error("Agent loop exceeded iteration limit");
@@ -133,19 +148,26 @@ export async function* runAgentLoopStream({
     }
 
     if (llm.stream) {
+      let buffer = "";
       for await (const chunk of llm.stream(context)) {
         if (chunk.delta) {
+          buffer += chunk.delta;
           yield { type: "token", text: chunk.delta };
         }
       }
-      yield { type: "final", message };
+      const finalMessage = sanitizeAssistantMessage({
+        ...message,
+        content: buffer || message.content,
+      });
+      yield { type: "final", message: finalMessage };
       return;
     }
 
-    if (message.content) {
-      yield { type: "token", text: message.content };
+    const finalMessage = sanitizeAssistantMessage(message);
+    if (finalMessage.content) {
+      yield { type: "token", text: finalMessage.content };
     }
-    yield { type: "final", message };
+    yield { type: "final", message: finalMessage };
     return;
   }
 

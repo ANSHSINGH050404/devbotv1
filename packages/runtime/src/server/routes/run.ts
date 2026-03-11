@@ -41,6 +41,21 @@ runRoute.post("/", async (c) => {
   try {
     const projectId = c.req.query("projectId");
     let contextMessages = buildContext(messages);
+    const toolList = Object.keys(tools);
+    contextMessages = [
+      {
+        role: "system",
+        content:
+          "You are a coding agent with access to tools for reading, searching, and editing the local repository. " +
+          `Available tools: ${toolList.join(", ")}. ` +
+          "If the user asks to analyze the codebase, use the search and read tools to inspect files directly.",
+        name: undefined,
+        toolCallId: undefined,
+        toolCall: undefined,
+        toolCalls: undefined,
+      },
+      ...contextMessages,
+    ];
     if (projectId) {
       const memories = await listMemories(projectId, 50);
       if (memories.length > 0) {
@@ -111,6 +126,21 @@ runRoute.post("/stream", async (c) => {
       try {
         const projectId = c.req.query("projectId");
         let contextMessages = buildContext(messages);
+        const toolList = Object.keys(tools);
+        contextMessages = [
+          {
+            role: "system",
+            content:
+              "You are a coding agent with access to tools for reading, searching, and editing the local repository. " +
+              `Available tools: ${toolList.join(", ")}. ` +
+              "If the user asks to analyze the codebase, use the search and read tools to inspect files directly.",
+            name: undefined,
+            toolCallId: undefined,
+            toolCall: undefined,
+            toolCalls: undefined,
+          },
+          ...contextMessages,
+        ];
         if (projectId) {
           const memories = await listMemories(projectId, 50);
           if (memories.length > 0) {
